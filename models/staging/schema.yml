@@ -1,0 +1,121 @@
+version: 2
+
+models:
+
+  - name: stg_patients
+    description: "Staging model for patient master data from RAW.PATIENTS."
+    columns:
+      - name: PATIENT_ID
+        description: "Unique identifier for each patient."
+        tests:
+          - not_null
+          - unique
+
+      - name: PATIENT_NAME
+        description: "Full name of the patient."
+        tests:
+          - not_null
+
+      - name: GENDER
+        description: "Gender of the patient (M/F)."
+
+      - name: DOB
+        description: "Date of birth of the patient."
+
+      - name: CITY
+        description: "City where the patient is located."
+
+      - name: CREATED_AT
+        description: "Date when the patient record was created."
+
+  - name: stg_doctors
+    description: "Staging model for doctor master data from RAW.DOCTORS."
+    columns:
+      - name: DOCTOR_ID
+        description: "Unique identifier for each doctor."
+        tests:
+          - not_null
+          - unique
+
+      - name: DOCTOR_NAME
+        description: "Doctor full name."
+        tests:
+          - not_null
+
+      - name: SPECIALIZATION
+        description: "Doctor specialization (Cardiology, Dermatology, etc.)."
+
+      - name: DEPARTMENT
+        description: "Department assigned to the doctor."
+
+  - name: stg_appointments
+    description: "Staging model for appointment transactions from RAW.APPOINTMENTS."
+    columns:
+      - name: APPOINTMENT_ID
+        description: "Unique identifier for each appointment."
+        tests:
+          - not_null
+          - unique
+
+      - name: PATIENT_ID
+        description: "Foreign key reference to patient."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_patients')
+              field: PATIENT_ID
+
+      - name: DOCTOR_ID
+        description: "Foreign key reference to doctor."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_doctors')
+              field: DOCTOR_ID
+
+      - name: APPOINTMENT_DATE
+        description: "Date of appointment."
+        tests:
+          - not_null
+
+      - name: APPOINTMENT_TIME
+        description: "Time of appointment."
+
+      - name: APPOINTMENT_STATUS
+        description: "Status of appointment (Completed, Cancelled, No-Show, Pending)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["Completed", "Cancelled", "No-Show", "Pending"]
+
+      - name: CREATED_AT
+        description: "Timestamp when the appointment was created."
+
+  - name: stg_billing
+    description: "Staging model for billing transactions from RAW.BILLING."
+    columns:
+      - name: BILL_ID
+        description: "Unique identifier for each bill."
+        tests:
+          - not_null
+          - unique
+
+      - name: APPOINTMENT_ID
+        description: "Foreign key reference to appointment."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_appointments')
+              field: APPOINTMENT_ID
+
+      - name: BILL_AMOUNT
+        description: "Total billed amount for the appointment."
+
+      - name: PAYMENT_STATUS
+        description: "Payment status (Paid/Unpaid/Partial)."
+        tests:
+          - accepted_values:
+              values: ["Paid", "Unpaid", "Partial"]
+
+      - name: PAYMENT_DATE
+        description: "Date when payment was received (if applicable)."

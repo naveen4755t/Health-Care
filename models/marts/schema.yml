@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: dim_patients
+    description: "Dimension table for patients used for reporting and filtering in Power BI."
+    columns:
+      - name: PATIENT_ID
+        description: "Primary key for patient dimension."
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_doctors
+    description: "Dimension table for doctors used for reporting and filtering in Power BI."
+    columns:
+      - name: DOCTOR_ID
+        description: "Primary key for doctor dimension."
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_appointments
+    description: "Fact table containing appointment transactions joined with patient, doctor, and billing details."
+    columns:
+      - name: APPOINTMENT_ID
+        description: "Primary key for the appointment fact table."
+        tests:
+          - not_null
+          - unique
+
+      - name: PATIENT_ID
+        description: "Foreign key to dim_patients."
+        tests:
+          - relationships:
+              to: ref('dim_patients')
+              field: PATIENT_ID
+
+      - name: DOCTOR_ID
+        description: "Foreign key to dim_doctors."
+        tests:
+          - relationships:
+              to: ref('dim_doctors')
+              field: DOCTOR_ID
+
+      - name: APPOINTMENT_STATUS
+        description: "Appointment status used for operational KPIs."
+        tests:
+          - accepted_values:
+              values: ["Completed", "Cancelled", "No-Show", "Pending"]
